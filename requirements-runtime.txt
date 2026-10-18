@@ -1,0 +1,24 @@
+# Install the CUDA pair first from https://download.pytorch.org/whl/cu128.
+torch==2.10.0
+torchvision==0.25.0
+transformers>=4.57,<6
+accelerate>=1.10,<2
+bitsandbytes>=0.48,<1
+opencv-python-headless>=4.11,<5
+av>=14,<17
+pillow>=11,<13
+openpyxl>=3.1,<4
+numpy>=2,<3
+scipy>=1.15,<2
+fastapi>=0.115,<1
+uvicorn>=0.34,<1
+python-multipart>=0.0.20,<1
+httpx>=0.28,<1
+pytest>=8,<10
+huggingface_hub>=0.34,<2
+safetensors>=0.6,<1
+psutil>=7,<8
+qwen-vl-utils>=0.0.14,<1
+requests>=2.32,<3
+scikit-learn>=1.7,<2
+joblib>=1.5,<2

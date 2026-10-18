@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; style-src 'self'; script-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self';">
+  <title>ForteBank — Видеоаудит кассовых операций</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Перейти к основному содержимому</a>
+
+  <header class="site-header" role="banner">
+    <div class="container header-inner">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false">
+            <rect width="36" height="36" rx="8" fill="#951B4C"/>
+            <path d="M11 10H25V13.5H15V16.75H23V20.25H15V26H11V10Z" fill="#FFFFFF"/>
+            <circle cx="24.5" cy="24.5" r="2.5" fill="#F3D1DC"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-org">ForteBank</span>
+          <h1 class="brand-title">Видеоаудит кассовых операций</h1>
+        </div>
+      </div>
+
+      <div class="header-meta" aria-label="Состояние сервиса">
+        <div id="service-health-badge" class="service-pill service-pill--neutral" role="status" aria-live="polite">
+          <span class="service-dot" aria-hidden="true"></span>
+          <span id="service-health-text">Проверка доступности сервиса</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content" class="container main-layout" tabindex="-1">
+    <section class="compliance-disclaimer" aria-label="Правовое уведомление">
+      <div class="disclaimer-icon" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false">
+          <path d="M10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18C14.4183 18 18 14.4183 18 10C18 5.58172 14.4183 2 10 2ZM9 6H11V11H9V6ZM9 13H11V15H9V13Z" fill="#951B4C"/>
+        </svg>
+      </div>
+      <p class="disclaimer-text">
+        Сервис отмечает возможные нарушения и показывает подтверждающие кадры. Итоговую оценку даёт специалист.
+      </p>
+    </section>
+
+    <div class="workspace-grid">
+      <div class="workspace-col workspace-col--controls">
+        <section class="card" aria-labelledby="auth-section-title">
+          <div class="card-header">
+            <h2 id="auth-section-title" class="card-title">Доступ к проверке</h2>
+            <span id="key-storage-badge" class="badge badge--muted">Ключ не задан</span>
+          </div>
+          <p class="card-subtitle">
+            Введите выданный ключ доступа. Он сохраняется только в текущей вкладке.
+          </p>
+
+          <form id="auth-form" class="auth-form" novalidate>
+            <div class="field-group">
+              <label for="api-key-input" class="field-label">Ключ доступа</label>
+              <div class="input-with-actions">
+                <input
+                  type="password"
+                  id="api-key-input"
+                  name="apiKey"
+                  class="text-input"
+                  autocomplete="off"
+                  spellcheck="false"
+                  placeholder="Введите рабочий ключ доступа..."
+                  aria-describedby="api-key-help"
+                  required
+                >
+                <button
+                  type="button"
+                  id="toggle-key-visibility-btn"
+                  class="btn btn--ghost btn--sm"
+                  aria-controls="api-key-input"
+                  aria-pressed="false"
+                  title="Показать или скрыть ключ"
+                >
+                  Показать
+                </button>
+                <button
+                  type="button"
+                  id="clear-key-btn"
+                  class="btn btn--secondary btn--sm"
+                  title="Удалить ключ из текущей сессии"
+                >
+                  Сбросить
+                </button>
+              </div>
+              <p id="api-key-help" class="field-help">
+                При закрытии вкладки браузера ключ автоматически удаляется.
+              </p>
+            </div>
+          </form>
+        </section>
+
+        <section class="card" aria-labelledby="upload-section-title">
+          <div class="card-header">
+            <h2 id="upload-section-title" class="card-title">Видеозапись кассовой операции</h2>
+            <span id="file-limit-badge" class="badge badge--neutral">Формат .MOV • до 256 МБ</span>
+          </div>
+
+          <div
+            id="drop-zone"
+            class="drop-zone"
+            role="button"
+            tabindex="0"
+            aria-describedby="drop-zone-constraints"
+            aria-label="Область выбора видеофайла формата .mov до 256 мегабайт. Нажмите Enter или перетащите файл сюда."
+          >
+            <input
+              type="file"
+              id="video-file-input"
+              class="sr-only"
+              accept=".mov,video/quicktime"
+              tabindex="-1"
+            >
+            <div class="drop-zone-icon" aria-hidden="true">
+              <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false">
+                <rect x="4" y="8" width="32" height="24" rx="4" stroke="#951B4C" stroke-width="2"/>
+                <path d="M20 25V15M20 15L16 19M20 15L24 19" stroke="#951B4C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <p class="drop-zone-title">Перетащите видеофайл <code>.mov</code> сюда или нажмите для выбора</p>
+            <p id="drop-zone-constraints" class="drop-zone-hint">
+              Поддерживаются только файлы контейнера QuickTime (<code>.mov</code>), максимальный размер — 256 МБ.
+            </p>
+          </div>
+
+          <div id="selected-file-panel" class="file-summary" hidden>
+            <div class="file-summary-info">
+              <div class="file-summary-icon" aria-hidden="true">MOV</div>
+              <div class="file-summary-details">
+                <p id="selected-file-name" class="file-name"></p>
+                <p id="selected-file-meta" class="file-meta"></p>
+              </div>
+            </div>
+            <button type="button" id="remove-file-btn" class="btn btn--secondary btn--sm">
+              Удалить файл
+            </button>
+          </div>
+
+          <div id="video-preview-container" class="video-preview-wrapper" hidden>
+            <div class="video-header">
+              <span class="video-label">Предпросмотр видеозаписи</span>
+              <span id="video-source-indicator" class="badge badge--muted">Локальный файл</span>
+            </div>
+            <video
+              id="audit-video-player"
+              class="audit-video"
+              controls
+              preload="metadata"
+              playsinline
+            ></video>
+            <div id="video-codec-fallback" class="video-fallback-notice" role="status" hidden>
+              <p>
+                <strong>Примечание о воспроизведении .MOV:</strong> встроенный плеер вашего браузера не поддерживает видеокодек данной записи QuickTime. Это <strong>не влияет</strong> на загрузку файла и серверный анализ — вы можете отправить запись на проверку.
+              </p>
+            </div>
+            <p id="video-seek-feedback" class="video-seek-feedback" role="status" aria-live="polite" hidden></p>
+          </div>
+
+          <div class="submit-bar">
+            <button type="button" id="submit-audit-btn" class="btn btn--primary btn--full" disabled>
+              Отправить видео на проверку
+            </button>
+            <p class="submit-note">
+              Одновременно выполняется только одна задача анализа. Пауза и возобновление задачи после отправки не предусмотрены.
+            </p>
+          </div>
+        </section>
+      </div>
+
+      <div class="workspace-col workspace-col--results">
+        <section class="card status-card" aria-labelledby="status-section-title">
+          <div class="card-header">
+            <div>
+              <h2 id="status-section-title" class="card-title">Статус и результат проверки</h2>
+              <p id="job-id-display" class="job-id-text" hidden>
+                ID задачи: <code id="job-id-value"></code>
+              </p>
+            </div>
+            <span id="state-pill" class="state-pill state-pill--idle" role="status" aria-live="polite">
+              Ожидание
+            </span>
+          </div>
+
+          <div id="state-alert-box" class="alert-box" role="alert" aria-live="assertive" hidden>
+            <div class="alert-box-content">
+              <p id="state-alert-title" class="alert-title"></p>
+              <p id="state-alert-message" class="alert-message"></p>
+            </div>
+            <div id="state-alert-actions" class="alert-actions" hidden>
+              <button type="button" id="retry-poll-btn" class="btn btn--secondary btn--sm">
+                Повторить запрос статуса
+              </button>
+              <button type="button" id="reset-job-btn" class="btn btn--ghost btn--sm">
+                Новая проверка
+              </button>
+            </div>
+          </div>
+
+          <div id="progress-panel" class="progress-panel" aria-live="polite" hidden>
+            <div class="progress-meta">
+              <span id="progress-stage-label" class="progress-stage">Подготовка к обработке...</span>
+              <span id="progress-percent-label" class="progress-percent">—</span>
+            </div>
+            <div
+              id="progress-bar-track"
+              class="progress-track"
+              role="progressbar"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+              aria-label="Прогресс обработки видеозаписи"
+            >
+              <div id="progress-bar-fill" class="progress-fill progress-fill--indeterminate"></div>
+            </div>
+            <p id="progress-subtext" class="progress-subtext">
+              Опрос состояния задачи выполняется автоматически каждые 1,5 сек. Повторная отправка заблокирована до завершения.
+            </p>
+          </div>
+
+          <div id="idle-placeholder" class="empty-state">
+            <div class="empty-state-icon" aria-hidden="true">
+              <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false">
+                <rect x="6" y="8" width="32" height="28" rx="4" stroke="#8C959F" stroke-width="2"/>
+                <path d="M14 17H30M14 23H26M14 29H22" stroke="#8C959F" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <h3 class="empty-state-title">Задача еще не запущена</h3>
+            <p class="empty-state-text">
+              Укажите ключ API, выберите видеофайл формата <code>.mov</code> и нажмите «Отправить видео на проверку», чтобы начать аудит кассовой операции.
+            </p>
+          </div>
+
+          <div id="verdict-summary-panel" class="verdict-summary" hidden>
+            <div class="verdict-badges-row">
+              <div class="verdict-badge-group">
+                <span class="verdict-group-label">Итоговый вердикт</span>
+                <span id="verdict-badge" class="verdict-badge"></span>
+              </div>
+              <div class="verdict-badge-group">
+                <span class="verdict-group-label">Зафиксировано событий</span>
+                <span id="events-count-badge" class="events-count-badge">0</span>
+              </div>
+            </div>
+            <p id="verdict-explanation" class="verdict-explanation"></p>
+            <div class="verdict-actions-bar">
+              <button type="button" id="start-new-audit-btn" class="btn btn--secondary btn--sm">
+                Проверить другой файл
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section id="violations-section" class="card violations-card" aria-labelledby="violations-section-title" hidden>
+          <div class="card-header">
+            <h2 id="violations-section-title" class="card-title">Зафиксированные эпизоды для проверки специалистом</h2>
+            <span id="violations-list-counter" class="badge badge--burgundy">0</span>
+          </div>
+          <p class="card-subtitle">
+            Нажмите на таймкод эпизода для перехода к соответствующему моменту на видеозаписи или откройте стоп-кадр для детального просмотра.
+          </p>
+          <ol id="violations-list" class="violations-list"></ol>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <div class="container footer-inner">
+      <span>Внутренний инструмент комплаенс-контроля кассовых операций • ForteBank</span>
+      <span id="config-meta-footer" class="footer-meta">Работа без внешних сетевых зависимостей</span>
+    </div>
+  </footer>
+
+  <div
+    id="evidence-modal"
+    class="modal-backdrop"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modal-title"
+    aria-describedby="modal-description"
+    hidden
+  >
+    <div class="modal-dialog" role="document">
+      <div class="modal-header">
+        <div>
+          <h2 id="modal-title" class="modal-title">Просмотр стоп-кадра</h2>
+          <p id="modal-subtitle" class="modal-subtitle"></p>
+        </div>
+        <button
+          type="button"
+          id="modal-close-btn"
+          class="btn btn--ghost btn--sm modal-close-btn"
+          aria-label="Закрыть окно просмотра кадра (Escape)"
+        >
+          Закрыть ✕
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <figure class="modal-figure">
+          <img id="modal-image" class="modal-image" src="" alt="">
+          <figcaption id="modal-caption" class="modal-caption"></figcaption>
+        </figure>
+        <div id="modal-description" class="modal-description"></div>
+      </div>
+
+      <div class="modal-footer">
+        <div class="modal-nav-group">
+          <button type="button" id="modal-prev-btn" class="btn btn--secondary btn--sm">
+            ← Предыдущий кадр
+          </button>
+          <span id="modal-frame-counter" class="modal-frame-counter">1 / 1</span>
+          <button type="button" id="modal-next-btn" class="btn btn--secondary btn--sm">
+            Следующий кадр →
+          </button>
+        </div>
+        <button type="button" id="modal-seek-btn" class="btn btn--primary btn--sm">
+          Перейти к таймкоду в плеере
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

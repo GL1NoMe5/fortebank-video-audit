@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ForteBank · Локальная разметка</title>
+  <style>
+    :root{font-family:system-ui,sans-serif;color:#221821;background:#f6f3f5;color-scheme:light;--accent:#951b4c;--line:#dfd6dc}
+    *{box-sizing:border-box}body{margin:0}header{padding:20px 28px;background:#fff;border-bottom:1px solid var(--line)}h1{font-size:24px;margin:0 0 5px}p{line-height:1.5}.muted,small{color:#6b5b65}main{max-width:1440px;margin:auto;padding:24px;display:grid;grid-template-columns:minmax(320px,1fr) minmax(340px,1fr);gap:24px}.panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;min-width:0}h2{font-size:19px;margin:0 0 14px}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}label{display:block;font-size:14px;margin:10px 0 5px}input,textarea,select,button{font:inherit}input[type=number],textarea,select{width:100%;padding:9px;border:1px solid #bcaab5;border-radius:7px;background:white;color:inherit}textarea{resize:vertical;min-height:90px}button{border:1px solid #bcaab5;background:white;border-radius:7px;padding:9px 12px;cursor:pointer}button.primary{background:var(--accent);border-color:var(--accent);color:white}button:disabled{opacity:.5;cursor:wait}button.danger{color:#9c213a}video{display:block;width:100%;height:min(52vh,530px);background:#211b20;margin:16px 0;border-radius:8px}.badge{display:inline-block;border-radius:20px;background:#eee8ed;padding:5px 10px;font-size:13px}.holdout{background:#fff1ce;color:#6b4a00}.notice{border-left:4px solid var(--accent);padding:10px 13px;background:#fbf3f6}.warning{border-left-color:#b07800;background:#fff7e4}.event{border:1px solid var(--line);border-radius:9px;padding:14px;margin:14px 0}.event-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.times{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.check{display:flex;gap:9px;align-items:flex-start}.check input{margin-top:3px}.help{font-size:13px;color:#66565f;line-height:1.4;white-space:pre-line}.status{min-height:24px;white-space:pre-wrap}.error{color:#a11b32}.success{color:#266544}.report{margin-top:18px}pre{white-space:pre-wrap;word-break:break-word;max-height:400px;overflow:auto;font-size:12px;background:#f6f3f5;padding:12px}.evidence{display:flex;gap:8px;flex-wrap:wrap}.evidence img{max-width:180px;max-height:180px;border-radius:5px}.reported-event{border-top:1px solid var(--line);margin-top:12px;padding-top:12px}.full{grid-column:1/-1}#empty{padding:18px 0;color:#6b5b65}@media(max-width:850px){main{grid-template-columns:1fr;padding:14px}header{padding:18px}.panel{padding:15px}}
+  </style>
+</head>
+<body>
+<header><h1>Локальная ручная разметка</h1><div class="muted">Видео, отчёты и ваши записи остаются на этом компьютере. Интерфейс доступен только через localhost.</div></header>
+<main>
+  <section class="panel">
+    <h2>1. Просмотр ролика</h2>
+    <label for="splitFilter">Выборка</label>
+    <select id="splitFilter"><option value="train">Обучающая — для калибровки</option><option value="holdout">Holdout — только проверка</option><option value="all">Все ролики</option></select>
+    <label for="videoSelect">Ролик</label><select id="videoSelect"></select>
+    <p id="metadata"></p><p class="muted">В исходной разметке есть бинарная метка и точечный таймкод. Тип нарушения и границы события исходно не размечены.</p>
+    <div id="holdoutNotice" class="notice warning" hidden>Это holdout. Не используйте этот ролик и его ручную разметку для настройки порогов, промптов или примеров. В сохранённой записи calibration_allowed=false.</div>
+    <video id="player" controls muted playsinline preload="metadata"></video>
+    <div class="row"><button id="seekAnnotation" type="button">К исходному таймкоду</button><span id="clock" class="badge">0.00 с</span><span id="annotation"></span></div>
+    <p id="videoError" class="error" hidden>Браузер не смог открыть MOV. Откройте исходный файл локальным видеоплеером; форма ручной разметки продолжает работать.</p>
+    <div class="report"><h2>Локальный отчёт модели</h2><p class="muted">Покажите отчёт после собственного просмотра, чтобы уменьшить влияние предсказания на ручную оценку.</p><button id="showReport" type="button">Показать последний локальный отчёт</button><div id="reportContent" aria-live="polite"></div></div>
+  </section>
+  <section class="panel">
+    <h2>2. Уточнение событий</h2>
+    <div class="notice">Описывайте только видимое. Отсутствие действия в отдельных кадрах не доказывает, что его пропустили. Проверьте всю операцию и исключения выбранного правила.</div>
+    <div id="events"></div><p id="empty">Событий пока нет. Для проверенного ролика без событий отметьте просмотр завершённым и сохраните пустой список.</p>
+    <button id="addEvent" type="button">+ Добавить событие</button>
+    <label class="check"><input id="reviewComplete" type="checkbox"><span>Просмотр и ручная разметка этого ролика завершены</span></label>
+    <p class="muted">Неподтверждённые события сохраняются как черновики. Ручная запись не меняет исходную бинарную метку.</p>
+    <div class="row"><button id="save" class="primary" type="button">Сохранить на этом компьютере</button><button id="reload" type="button">Перечитать сохранённое</button></div>
+    <p id="status" class="status" role="status" aria-live="polite"></p><small>Файл: runtime/review_labels.json</small>
+  </section>
+</main>
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const state = {records:[],rules:[],token:"",record:null,revision:0,dirty:false,busy:false,loaded:false,load:0,editVersion:0,filter:"train"};
+const player = $("player");
+const text = (tag,value,className) => {const el=document.createElement(tag);el.textContent=value;if(className)el.className=className;return el;};
+function status(message,error=false){$("status").textContent=message;$("status").className=`status ${error?"error":"success"}`;}
+function dirty(){state.dirty=true;state.editVersion++;status("Есть несохранённые изменения.");}
+async function request(path,options={}){const response=await fetch(path,{cache:"no-store",...options});const data=await response.json();if(!response.ok){const detail=typeof data.detail==="string"?data.detail:"Проверьте поля формы и границы времени.";throw new Error(detail);}return data;}
+function seek(value){if(Number.isFinite(value))player.currentTime=Math.max(0,Math.min(value,state.record?.duration_sec||value));}
+function canLeave(){return !state.dirty||window.confirm("Перейти без сохранения изменений текущего ролика?");}
+function showEmpty(){$("empty").hidden=$("events").children.length>0;}
+function addEvent(value={}){
+  const card=document.createElement("article");card.className="event";
+  const heading=document.createElement("div");heading.className="event-head";heading.append(text("strong","Событие"));
+  const remove=text("button","Удалить","danger");remove.type="button";remove.onclick=()=>{card.remove();showEmpty();dirty();};heading.append(remove);card.append(heading);
+  const typeLabel=text("label","Тип события");const select=document.createElement("select");select.dataset.field="rule_id";
+  for(const rule of state.rules){const option=document.createElement("option");option.value=rule.id;option.textContent=`${rule.title}${rule.supported?"":" — нормативно не подтверждено"}`;select.append(option);}
+  if(value.rule_id&&state.rules.some(rule=>rule.id===value.rule_id))select.value=value.rule_id;
+  typeLabel.append(select);card.append(typeLabel);
+  const help=text("p","","help");card.append(help);
+  function ruleHelp(){const rule=state.rules.find(item=>item.id===select.value);help.textContent=[rule?.description,...(rule?.exceptions||[]),...(rule?.insufficient_evidence||[]).map(item=>`Недостаточно: ${item}`)].filter(Boolean).join("\n");help.className=`help ${rule?.supported?"":"error"}`;}
+  select.addEventListener("change",ruleHelp);ruleHelp();
+  const times=document.createElement("div");times.className="times";const current=Number((Number.isFinite(player.currentTime)?player.currentTime:0).toFixed(2));
+  for(const [field,label] of [["start_sec","Начало, с"],["timecode_sec","Таймкод, с"],["end_sec","Конец, с"]]){const wrapper=text("label",label);const input=document.createElement("input");input.type="number";input.min="0";input.max=String(state.record.duration_sec);input.step="0.01";input.required=true;input.dataset.field=field;input.value=String(value[field]??current);wrapper.append(input);times.append(wrapper);}
+  card.append(times);
+  const controls=document.createElement("div");controls.className="row";
+  for(const [field,label] of [["start_sec","Начало = сейчас"],["timecode_sec","Таймкод = сейчас"],["end_sec","Конец = сейчас"]]){const button=text("button",label);button.type="button";button.onclick=()=>{card.querySelector(`[data-field="${field}"]`).value=player.currentTime.toFixed(2);dirty();};controls.append(button);}
+  const jump=text("button","К событию");jump.type="button";jump.onclick=()=>seek(Number(card.querySelector('[data-field="timecode_sec"]').value));controls.append(jump);card.append(controls);
+  const descriptionLabel=text("label","Фактическое описание видимых действий");const description=document.createElement("textarea");description.dataset.field="description";description.maxLength=4000;description.value=value.description||"";descriptionLabel.append(description);card.append(descriptionLabel);
+  const confirmLabel=document.createElement("label");confirmLabel.className="check";const confirmed=document.createElement("input");confirmed.type="checkbox";confirmed.dataset.field="confirmed";confirmed.checked=value.confirmed===true;confirmLabel.append(confirmed,text("span","Подтверждено мной после просмотра"));card.append(confirmLabel);
+  card.addEventListener("input",dirty);card.addEventListener("change",dirty);$("events").append(card);showEmpty();
+}
+async function loadVideo(id){
+  const generation=++state.load;state.busy=true;state.loaded=false;state.revision=0;$("save").disabled=true;state.record=state.records.find(record=>record.id===id);state.dirty=false;
+  $("events").replaceChildren();$("reportContent").replaceChildren();$("showReport").disabled=false;$("videoError").hidden=true;$("reviewComplete").checked=false;status("Загружается сохранённая разметка…");
+  const record=state.record;if(!record){state.busy=false;return;}
+  $("metadata").textContent=`Исходная бинарная метка: ${record.label} (${record.label===1?"нарушение отмечено авторами":"нарушение не отмечено авторами"}). Длительность: ${Number(record.duration_sec).toFixed(2)} с.`;
+  $("holdoutNotice").hidden=record.split!=="holdout";$("annotation").textContent=record.annotated_sec==null?"Исходного таймкода нет":`Исходная отметка: ${record.annotated_sec} с`;
+  $("seekAnnotation").disabled=record.annotated_sec==null;player.src=`/video/${encodeURIComponent(id)}`;player.muted=true;
+  try{const saved=await request(`/labels/${encodeURIComponent(id)}`);if(generation!==state.load)return;state.revision=saved.revision||0;for(const event of saved.events||[])addEvent(event);$("reviewComplete").checked=saved.review_complete===true;showEmpty();state.loaded=true;status(saved.revision?"Сохранённая разметка загружена.":"Этот ролик ещё не размечен вручную.");}
+  catch(error){if(generation!==state.load)return;status(error.message,true);return;}
+  finally{if(generation===state.load){state.busy=false;$("save").disabled=!state.loaded;}}
+}
+function optionsForFilter(){const previous=state.record?.id;$("videoSelect").replaceChildren();for(const record of state.records.filter(record=>$("splitFilter").value==="all"||record.split===$("splitFilter").value)){const option=document.createElement("option");option.value=record.id;option.textContent=`${record.id} · ${record.label===1?"метка 1":"метка 0"} · ${record.split}`;$("videoSelect").append(option);}if([...$("videoSelect").options].some(option=>option.value===previous))$("videoSelect").value=previous;return $("videoSelect").value;}
+$("splitFilter").addEventListener("change",()=>{if(!canLeave()){$("splitFilter").value=state.filter;return;}state.filter=$("splitFilter").value;loadVideo(optionsForFilter());});
+$("videoSelect").addEventListener("change",()=>{if(!canLeave()){$("videoSelect").value=state.record.id;return;}loadVideo($("videoSelect").value);});
+$("reload").onclick=()=>{if(state.record&&canLeave())loadVideo(state.record.id);};
+$("seekAnnotation").onclick=()=>seek(state.record?.annotated_sec);
+$("addEvent").onclick=()=>{if(state.record&&state.loaded&&!state.busy){addEvent();dirty();}};
+$("reviewComplete").addEventListener("change",dirty);
+player.addEventListener("loadedmetadata",()=>{if(state.record?.annotated_sec!=null)seek(state.record.annotated_sec);});
+player.addEventListener("timeupdate",()=>{$("clock").textContent=`${player.currentTime.toFixed(2)} с`;});
+player.addEventListener("error",()=>{$("videoError").hidden=false;});
+$("save").onclick=async()=>{
+  if(!state.record||!state.loaded||state.busy)return;
+  const events=[];
+  for(const card of $("events").children){const item={};for(const input of card.querySelectorAll("[data-field]")){item[input.dataset.field]=input.type==="checkbox"?input.checked:input.type==="number"?(input.value.trim()===""?NaN:Number(input.value)):input.value;}if(![item.start_sec,item.timecode_sec,item.end_sec].every(Number.isFinite)){status("Заполните все три временные отметки числом.",true);return;}if(!(0<=item.start_sec&&item.start_sec<=item.timecode_sec&&item.timecode_sec<=item.end_sec&&item.end_sec<=state.record.duration_sec)){status("Нужен интервал: 0 ≤ начало ≤ таймкод ≤ конец ≤ длительность ролика.",true);return;}events.push(item);}
+  const id=state.record.id;const submittedVersion=state.editVersion;state.busy=true;$("save").disabled=true;$("videoSelect").disabled=true;$("splitFilter").disabled=true;$("reload").disabled=true;
+  try{const saved=await request(`/labels/${encodeURIComponent(id)}`,{method:"POST",headers:{"Content-Type":"application/json","X-Review-Token":state.token},body:JSON.stringify({events,review_complete:$("reviewComplete").checked,base_revision:state.revision})});state.revision=saved.revision;state.dirty=state.editVersion!==submittedVersion;status(`Сохранено локально.${saved.calibration_allowed?"":" Holdout исключён из калибровки."}${state.dirty?" Есть более новые несохранённые изменения.":""}`);}
+  catch(error){status(error.message,true);}
+  finally{state.busy=false;$("save").disabled=!state.loaded;$("videoSelect").disabled=false;$("splitFilter").disabled=false;$("reload").disabled=false;}
+};
+$("showReport").onclick=async()=>{
+  if(!state.record)return;const id=state.record.id;$("showReport").disabled=true;$("reportContent").replaceChildren(text("p","Поиск локального отчёта…"));
+  try{const data=await request(`/report/${encodeURIComponent(id)}`);if(state.record?.id!==id)return;const holder=$("reportContent");holder.replaceChildren();if(!data.found){holder.append(text("p","Для этого исходного файла локальный отчёт пока не найден."));return;}const report=data.report;holder.append(text("p",`Вердикт модели: ${report.result?.verdict||"результат отсутствует"}. Это предсказание, а не ручная разметка.`));for(const event of report.result?.violations||[]){const card=document.createElement("div");card.className="reported-event";card.append(text("strong",event.type||"Событие"));const jump=text("button",`${event.timecode_sec} с`);jump.type="button";jump.onclick=()=>seek(Number(event.timecode_sec));card.append(jump,text("p",event.description||""));const gallery=document.createElement("div");gallery.className="evidence";for(const frame of event.evidence_frames||[]){if(typeof frame.image_base64!=="string"||!/^\/9j\/[A-Za-z0-9+/=\r\n]+$/.test(frame.image_base64))continue;const img=document.createElement("img");img.src=`data:image/jpeg;base64,${frame.image_base64}`;img.alt=`Локальный кадр ${frame.timestamp_sec} с`;gallery.append(img);}card.append(gallery);holder.append(card);}const details=document.createElement("details");details.append(text("summary","Полный локальный отчёт (JSON)"));const pre=document.createElement("pre");pre.textContent=JSON.stringify(report,null,2);details.append(pre);holder.append(details);}
+  catch(error){if(state.record?.id===id)$("reportContent").replaceChildren(text("p",error.message,"error"));}
+  finally{if(state.record?.id===id)$("showReport").disabled=false;}
+};
+window.addEventListener("beforeunload",event=>{if(state.dirty){event.preventDefault();event.returnValue="";}});
+(async()=>{try{const boot=await request("/bootstrap");state.records=boot.records;state.rules=boot.rules;state.token=boot.token;const id=optionsForFilter();if(id)await loadVideo(id);else status("В выбранной выборке нет роликов.",true);}catch(error){status(`Не удалось загрузить локальный сервис: ${error.message}`,true);}})();
+</script>
+</body>
+</html>

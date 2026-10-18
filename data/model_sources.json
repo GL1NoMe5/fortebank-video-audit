@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "models": {
+    "Qwen/Qwen3-VL-4B-Instruct": {
+      "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+      "license": "apache-2.0",
+      "license_evidence": "https://huggingface.co/Qwen/Qwen3-VL-4B-Instruct/blob/ebb281ec70b05090aa6165b016eac8ec08e71b17/README.md"
+    },
+    "Qwen/Qwen3-VL-8B-Instruct": {
+      "revision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+      "license": "apache-2.0",
+      "license_evidence": "https://huggingface.co/Qwen/Qwen3-VL-8B-Instruct/blob/0c351dd01ed87e9c1b53cbc748cba10e6187ff3b/README.md"
+    },
+    "IDEA-Research/grounding-dino-tiny": {
+      "revision": "a2bb814dd30d776dcf7e30523b00659f4f141c71",
+      "license": "apache-2.0",
+      "license_evidence": "https://huggingface.co/IDEA-Research/grounding-dino-tiny/blob/a2bb814dd30d776dcf7e30523b00659f4f141c71/README.md"
+    }
+  }
+}
