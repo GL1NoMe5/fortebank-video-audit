@@ -10,6 +10,26 @@ GitHub Pages размещает только статические HTML/CSS/JS.
 
 `site/config.js` содержит только публичный адрес API. `scripts/public_gateway.py` удерживает Windows от сна и перезапускает туннель; после изменения адреса обновляет Pages через Git. Компьютер и интернет должны работать всё время проверки жюри.
 
+## API для жюри (раздел 10 кейса)
+
+API base URL: `https://private-supported-comm-seconds.trycloudflare.com`
+
+Это корень API, без `/api/v1/analyze`. Временный адрес может измениться после перезапуска туннеля; актуальный адрес также указан в `site/config.js`. Если адрес изменился после сдачи формы, его необходимо отдельно сообщить жюри.
+
+Ключ передаётся жюри отдельно, в заголовке `X-API-Key`. Без ключа или с неверным ключом запрос отклоняется с HTTP 401.
+
+Пример (Bash; замените `<JURY_KEY>` и имя файла своими значениями):
+
+```bash
+API_BASE="https://private-supported-comm-seconds.trycloudflare.com"
+JURY_KEY="<JURY_KEY>"
+curl -X POST "$API_BASE/api/v1/analyze" -H "X-API-Key: $JURY_KEY" -F "file=@video.mov"
+# HTTP 202: {"job_id":"..."}
+curl "$API_BASE/api/v1/jobs/<JOB_ID>" -H "X-API-Key: $JURY_KEY"
+```
+
+Повторяйте GET, пока `status` равен `processing`. Завершение: `done` или `failed`. Ответ `done` содержит ровно `job_id`, `status`, `verdict`, `violations`. При `no_violation` список `violations` пуст. При `violation` каждый элемент содержит `type`, `timecode_sec`, `description`, `evidence_frames`; каждый кадр — `timestamp_sec` и `image_base64` (чистый Base64 JPEG без префикса `data:`).
+
 ## Локальный запуск
 
 Установить зависимости из requirements-runtime.txt в .venv, разместить модель локально в models/Qwen3-VL-8B-Instruct и предоставить локальные данные/память.
